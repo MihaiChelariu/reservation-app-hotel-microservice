@@ -1,0 +1,1 @@
+To start the application run the PowerShell script: "startHotel.ps1".
