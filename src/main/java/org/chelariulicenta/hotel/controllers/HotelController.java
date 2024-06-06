@@ -61,8 +61,8 @@ public class HotelController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate parse = LocalDate.parse(checkout, formatter);
 
-            hotelService.updateCalendarAfterSave(id, LocalDate.parse(checkin, formatter), LocalDate.parse(checkout, formatter), singleCameras, doubleCameras, premiumCameras);
-            return ResponseEntity.status(HttpStatus.OK).body("");
+            ResponseEntity responseEntity = hotelService.updateCalendarAfterSave(id, LocalDate.parse(checkin, formatter), LocalDate.parse(checkout, formatter), singleCameras, doubleCameras, premiumCameras);
+            return responseEntity;
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

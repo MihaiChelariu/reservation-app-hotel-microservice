@@ -2,6 +2,7 @@ package org.chelariulicenta.hotel.services;
 
 import com.github.dozermapper.core.Mapper;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.chelariulicenta.hotel.model.Hotel;
 import org.chelariulicenta.hotel.model.Calendar;
 import org.chelariulicenta.hotel.repositories.HotelRepository;
@@ -10,7 +11,9 @@ import org.chelariulicenta.hotel.view.VCalendar;
 import org.chelariulicenta.hotel.view.VHotel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -18,7 +21,8 @@ import java.util.List;
 import java.time.LocalDate;
 
 @Service
-@Transactional
+@Transactional(isolation = Isolation.SERIALIZABLE)
+@Slf4j
 public class HotelService {
 
     @Autowired
@@ -71,24 +75,29 @@ public class HotelService {
         return true;
     }
 
-    public void updateCalendarAfterSave(int hotelId, LocalDate checkin, LocalDate checkout, int singleRooms, int doubleRooms, int premiumRooms) {
+    public ResponseEntity updateCalendarAfterSave(int hotelId, LocalDate checkin, LocalDate checkout, int singleRooms, int doubleRooms, int premiumRooms) {
         List<Calendar> calendars = calendarRepository.findByIdHotelAndCalendarDateBetween(hotelId, checkin, checkout);
+        StringBuilder builder = new StringBuilder();
 
         for (Calendar calendar : calendars) {
-            if (singleRooms != 0) {
-                int availableSingleRooms = calendar.getAvailableSingleRooms();
+            int availableSingleRooms = calendar.getAvailableSingleRooms();
+            int availableDoubleRooms = calendar.getAvailableDoubleRooms();
+            int availablePremiumRooms = calendar.getAvailablePremiumRooms();
+            if (availableSingleRooms > 0 && availableSingleRooms >= singleRooms && singleRooms != 0) {
                 calendar.setAvailableSingleRooms(availableSingleRooms - singleRooms);
+                builder.append("single ");
             }
-            if(doubleRooms != 0){
-                int availableDoubleRooms = calendar.getAvailableDoubleRooms();
+            if(availableDoubleRooms > 0 && availableDoubleRooms >= doubleRooms &&doubleRooms != 0){
                 calendar.setAvailableDoubleRooms(availableDoubleRooms - doubleRooms);
+                builder.append("double ");
             }
-            if(premiumRooms != 0){
-                int availablePremiumRooms = calendar.getAvailablePremiumRooms();
+            if(availablePremiumRooms > 0 && availablePremiumRooms >= premiumRooms && premiumRooms != 0){
                 calendar.setAvailablePremiumRooms(availablePremiumRooms - premiumRooms);
+                builder.append("premium");
             }
         }
         calendarRepository.flush();
+        return ResponseEntity.status(200).body(builder.toString());
     }
 
     public Hotel reserveCameras(Integer id, Integer singleCameras, Integer doubleCameras, Integer premiumCameras) {
