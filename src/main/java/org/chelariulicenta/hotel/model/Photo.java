@@ -16,4 +16,5 @@ public class Photo {
     private int idPhoto;
     private int idHotel;
     private String urlPhoto;
+    private String photoType;
 }

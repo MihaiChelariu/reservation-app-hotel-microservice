@@ -153,4 +153,14 @@ public class HotelService {
         List<Calendar> calendars = calendarRepository.findByIdHotelAndCalendarDateBetween(id, checkin, checkout);
         return calendars.stream().map(calendar -> mapper.map(calendar, VCalendar.class)).toList();
     }
+
+    @Transactional(readOnly = true)
+    public VHotel getHotelsByName(String name){
+        Hotel hotel = hotelRepository.findByHotelName(name);
+        return mapper.map(hotel, VHotel.class);
+    }
+
+    public void deleteHotelById (int id) {
+        hotelRepository.deleteByIdHotel(id);
+    }
 }

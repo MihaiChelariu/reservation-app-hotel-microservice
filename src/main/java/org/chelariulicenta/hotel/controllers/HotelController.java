@@ -82,4 +82,14 @@ public class HotelController {
         List<VCalendar> vCalendars = hotelService.roomsAvailable(id, LocalDate.parse(checkin, formatter), LocalDate.parse(checkout, formatter));
         return vCalendars;
     }
+
+    @GetMapping("/getHotelByName/{name}")
+    private VHotel getHotelByName (@PathVariable String name){
+        return hotelService.getHotelsByName(name);
+    }
+
+    @DeleteMapping("/deleteHotelById/{hotelId}")
+    private void deleteHotelById(@PathVariable (name = "hotelId") int id){
+        hotelService.deleteHotelById(id);
+    }
 }
