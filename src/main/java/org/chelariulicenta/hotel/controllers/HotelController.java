@@ -68,6 +68,25 @@ public class HotelController {
         }
     }
 
+    @PutMapping("/cancelReservation/{hotelId}")
+    private ResponseEntity<String> cancelReservation(
+            @PathVariable(name = "hotelId") Integer id,
+            @RequestParam("checkin") String checkin,
+            @RequestParam("checkout") String checkout,
+            @RequestParam("singleCameras") Integer singleCameras,
+            @RequestParam("doubleCameras") Integer doubleCameras,
+            @RequestParam("premiumCameras") Integer premiumCameras) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate parse = LocalDate.parse(checkout, formatter);
+
+            ResponseEntity responseEntity = hotelService.updateCalendarAfterCancel(id, LocalDate.parse(checkin, formatter), LocalDate.parse(checkout, formatter), singleCameras, doubleCameras, premiumCameras);
+            return responseEntity;
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/saveHotel")
     private VHotel saveHotel(@RequestBody VHotel vHotel) {
         VHotel saveHotel = hotelService.saveHotel(vHotel);

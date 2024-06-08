@@ -100,6 +100,31 @@ public class HotelService {
         return ResponseEntity.status(200).body(builder.toString());
     }
 
+    public ResponseEntity updateCalendarAfterCancel(int hotelId, LocalDate checkin, LocalDate checkout, int singleRooms, int doubleRooms, int premiumRooms) {
+        List<Calendar> calendars = calendarRepository.findByIdHotelAndCalendarDateBetween(hotelId, checkin, checkout);
+        StringBuilder builder = new StringBuilder();
+
+        for (Calendar calendar : calendars) {
+            int availableSingleRooms = calendar.getAvailableSingleRooms();
+            int availableDoubleRooms = calendar.getAvailableDoubleRooms();
+            int availablePremiumRooms = calendar.getAvailablePremiumRooms();
+            if (singleRooms != 0) {
+                calendar.setAvailableSingleRooms(availableSingleRooms + singleRooms);
+                builder.append("single ");
+            }
+            if(doubleRooms != 0){
+                calendar.setAvailableDoubleRooms(availableDoubleRooms + doubleRooms);
+                builder.append("double ");
+            }
+            if(premiumRooms != 0){
+                calendar.setAvailablePremiumRooms(availablePremiumRooms + premiumRooms);
+                builder.append("premium");
+            }
+        }
+        calendarRepository.flush();
+        return ResponseEntity.status(200).body(builder.toString());
+    }
+
     public Hotel reserveCameras(Integer id, Integer singleCameras, Integer doubleCameras, Integer premiumCameras) {
         Hotel hotel = hotelRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Id" + id + "not found!"));

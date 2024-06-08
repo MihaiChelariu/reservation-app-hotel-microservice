@@ -18,12 +18,20 @@ public class PhotoController {
     private PhotoService photoService;
 
     @GetMapping("/getAllByHotelId/{id}")
-    public List<VPhoto> getAllByHotelId(@PathVariable Integer id) {
+    private List<VPhoto> getAllByHotelId(@PathVariable Integer id) {
         return photoService.getPhotosByHotelId(id);
     }
 
     @GetMapping("/getFirstByHotelId/{id}")
-    public VPhoto getFirstByHotelId(@PathVariable Integer id){
+    private VPhoto getFirstByHotelId(@PathVariable Integer id){
         return photoService.getFirstByHotelId(id);
+    }
+
+    @GetMapping("/getPhotosByType/{id}")
+    private List<VPhoto> getPhotosByType(@PathVariable Integer id, @RequestParam("type") String type) {return photoService.getPhotosByType(id, type);}
+
+    @PostMapping("/savePhoto")
+    private void savePhoto(@RequestBody VPhoto photo){
+        photoService.savePhoto(photo);
     }
 }

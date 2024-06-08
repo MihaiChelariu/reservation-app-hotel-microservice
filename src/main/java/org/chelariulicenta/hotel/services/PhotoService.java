@@ -27,4 +27,14 @@ public class PhotoService {
         List<Photo> allByIdHotel = photoRepository.findAllByIdHotel(id);
         return mapper.map(allByIdHotel.get(0), VPhoto.class);
     }
+
+    public List<VPhoto> getPhotosByType(Integer id, String type){
+        List<Photo> photos = photoRepository.findAllByIdHotelAndPhotoType(id, type);
+        return photos.stream().map(photo -> mapper.map(photo, VPhoto.class)).toList();
+    }
+
+    public void savePhoto(VPhoto vPhoto){
+        Photo photo = mapper.map(vPhoto, Photo.class);
+        photoRepository.saveAndFlush(photo);
+    }
 }
