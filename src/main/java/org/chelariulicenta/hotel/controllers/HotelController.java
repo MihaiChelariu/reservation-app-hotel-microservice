@@ -111,4 +111,9 @@ public class HotelController {
     private void deleteHotelById(@PathVariable (name = "hotelId") int id){
         hotelService.deleteHotelById(id);
     }
+
+    @PostMapping("/populateDatabase")
+    public void populateDatabase(@RequestBody List<VHotel> vHotels) {
+        hotelService.populateDatabase(vHotels);
+    }
 }

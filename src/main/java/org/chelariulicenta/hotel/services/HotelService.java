@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
+import java.util.stream.IntStream;
 
 @Service
 @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -78,11 +79,24 @@ public class HotelService {
     public ResponseEntity updateCalendarAfterSave(int hotelId, LocalDate checkin, LocalDate checkout, int singleRooms, int doubleRooms, int premiumRooms) {
         List<Calendar> calendars = calendarRepository.findByIdHotelAndCalendarDateBetween(hotelId, checkin, checkout);
         StringBuilder builder = new StringBuilder();
+        boolean isAvailable = true;
 
         for (Calendar calendar : calendars) {
+
             int availableSingleRooms = calendar.getAvailableSingleRooms();
             int availableDoubleRooms = calendar.getAvailableDoubleRooms();
             int availablePremiumRooms = calendar.getAvailablePremiumRooms();
+            if (calendar.getAvailableSingleRooms() < singleRooms ||
+                    calendar.getAvailableDoubleRooms() < doubleRooms ||
+                    calendar.getAvailablePremiumRooms() < premiumRooms) {
+                isAvailable = false;
+                break;
+            }
+
+
+        if (!isAvailable) {
+            return ResponseEntity.status(400).body("Insufficient rooms available for the requested period.");
+        }
             if (availableSingleRooms > 0 && availableSingleRooms >= singleRooms && singleRooms != 0) {
                 calendar.setAvailableSingleRooms(availableSingleRooms - singleRooms);
                 builder.append("single ");
@@ -172,6 +186,25 @@ public class HotelService {
         calendarRepository.saveAllAndFlush(calendarEntries);
 
         return vHotel;
+    }
+
+    public void populateDatabase(List<VHotel> vHotels) {
+        for (int idx = 1; idx <= 50; idx++) {
+            for (VHotel vHotel : vHotels) {
+                VHotel newHotel = new VHotel();
+                newHotel.setHotelName(vHotel.getHotelName()  + Integer.toString(idx));
+                newHotel.setHotelLocation(vHotel.getHotelLocation());
+                newHotel.setSingleCameras(vHotel.getSingleCameras());
+                newHotel.setDoubleCameras(vHotel.getDoubleCameras());
+                newHotel.setPremiumCameras(vHotel.getPremiumCameras());
+                newHotel.setHotelDescription(vHotel.getHotelDescription());
+                newHotel.setHotelRating(vHotel.getHotelRating());
+                newHotel.setSingleCameraPrice(vHotel.getSingleCameraPrice());
+                newHotel.setDoubleCameraPrice(vHotel.getDoubleCameraPrice());
+                newHotel.setPremiumCameraPrice(vHotel.getPremiumCameraPrice());
+                saveHotel(newHotel);
+            }
+        }
     }
 
     public List<VCalendar> roomsAvailable(int id, LocalDate checkin, LocalDate checkout) {
